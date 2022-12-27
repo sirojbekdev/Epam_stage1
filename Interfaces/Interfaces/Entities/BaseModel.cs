@@ -19,6 +19,7 @@
 						 Math.Pow(newPoint.Y - origin.Y, 2) +
 						 Math.Pow(newPoint.Z - origin.Z, 2) *
 								   1.0), 0.5);
+
 			return distance;
 		}
 	}

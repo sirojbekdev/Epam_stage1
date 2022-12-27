@@ -22,15 +22,17 @@ namespace Interfaces.Entities
 				if plane reaches maximum speed or distance is less than 10 km
 				it stops adding speed and rest of the distance calculated with current speed
 			*/
+			// calculate time spent on speeding up
 			while (currentSpeed < _maxSpeed || distance <= 10f)
 			{
 				timePassed += (10f / currentSpeed);
 				distance -= 10f;
 				currentSpeed += 10f;
 			}
+
 			var time = distance / currentSpeed;
-			time += timePassed;
-			TimeSpan timeSpan = TimeSpan.FromHours(time);
+			time += timePassed; // adds time spent for overall speed up  
+			TimeSpan timeSpan = TimeSpan.FromHours(time); // treats time as hours and formats it
 			return timeSpan.ToString();
 		}
 	}
