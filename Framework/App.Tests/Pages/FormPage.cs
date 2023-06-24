@@ -81,8 +81,9 @@ namespace App.Tests.Pages
 		public void FillForm()
         {
             _wait.Until(ExpectedConditions.UrlMatches(_url));
-            var acccountFrame = _wait.Until(ExpectedConditions.InvisibilityOfElementLocated(By.XPath("//iframe[@id='myFrame']")));
-            _driver.SwitchTo().Frame(PageFrame);
+			var pageFrame = _wait.Until(ExpectedConditions.ElementToBeClickable(PageFrame));
+			_driver.SwitchTo().Frame(PageFrame);
+            var acccountFrame = _wait.Until(ExpectedConditions.ElementToBeClickable(FormFrame));
             _driver.SwitchTo().Frame(FormFrame);
             NumberOfInstancesInput.Clear();
             NumberOfInstancesInput.SendKeys(_numberOfInstances);

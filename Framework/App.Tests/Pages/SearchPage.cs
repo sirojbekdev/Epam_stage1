@@ -2,20 +2,15 @@
 
 namespace App.Tests.Pages
 {
-    public class SearchPage
+    public class SearchPage : BasePage
     {
-        private readonly IWebDriver _driver;
-        private readonly WebDriverWait _wait;
+        
 
         private readonly string _url = "https://cloud.google.com/ ";
         private readonly string _numberOfInstances = "4";
 
-        public SearchPage(IWebDriver driver, WebDriverWait wait)
-        {
-            _driver = driver;
-            _wait = wait;
-            PageFactory.InitElements(_driver, this);
-        }
+        public SearchPage(IWebDriver driver, WebDriverWait wait) : base(driver, wait) { }
+
 
         [FindsBy(How = How.XPath, Using = "//input[@name='q']")]
         public IWebElement SearchBox { get; set; }
