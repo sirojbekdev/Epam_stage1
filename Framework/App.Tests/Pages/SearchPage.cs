@@ -1,13 +1,11 @@
 ﻿using SeleniumExtras.PageObjects;
+#nullable disable
 
 namespace App.Tests.Pages
 {
     public class SearchPage : BasePage
-    {
-        
-
+    {        
         private readonly string _url = "https://cloud.google.com/ ";
-        private readonly string _numberOfInstances = "4";
 
         public SearchPage(IWebDriver driver, WebDriverWait wait) : base(driver, wait) { }
 

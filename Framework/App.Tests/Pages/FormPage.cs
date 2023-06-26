@@ -1,24 +1,20 @@
-﻿using NUnit.Framework.Internal;
+﻿using App.Tests.Models;
 using SeleniumExtras.PageObjects;
+#nullable disable
 
 namespace App.Tests.Pages
 {
-    public class FormPage
+    public class FormPage : BasePage
     {
-        private readonly IWebDriver _driver;
-        private readonly WebDriverWait _wait;
-
-        private readonly string _numberOfInstances = "4";
+		private readonly EngineData _engineData;
         private readonly string _url = "https://cloud.google.com/products/calculator";
-        private readonly string _email = "sampleapp@yopmail.com";
 
 
-		public FormPage(IWebDriver driver, WebDriverWait wait)
+		public FormPage(IWebDriver driver, WebDriverWait wait) : base(driver, wait)
         {
-            _driver = driver;
-            _wait = wait;
             PageFactory.InitElements(_driver, this);
-        }
+			_engineData = DataReader.GetSection<EngineData>("../../../data.json", nameof(EngineData));
+		}
 
         [FindsBy(How = How.XPath, Using = "//iframe[contains(@name,'goog')]")]
         public IWebElement PageFrame { get; set; }
@@ -36,10 +32,10 @@ namespace App.Tests.Pages
         public IWebElement SeriesDropDown { get; set; }
 
         [FindsBy(How = How.XPath, Using = "//md-select[@placeholder='Instance type']")]
-        public IWebElement MachineTypeDropDown { get; set; }   
+		public IWebElement MachineTypeDropDown { get; set; }
 
-        [FindsBy(How = How.XPath, Using = "//div[contains(text(),'n1-standard-8')]")]
-        public IWebElement MachineType { get; set; }
+        public IWebElement MachineType => _driver.FindElement( 
+            By.XPath($"//div[contains(text(),'{_engineData.InstanceType}')]"));
 
         [FindsBy(How = How.XPath, Using = "//md-checkbox[@ng-model='listingCtrl.computeServer.addGPUs']")]
         public IWebElement AddGpuCheckbox { get; set; }
@@ -47,22 +43,19 @@ namespace App.Tests.Pages
         [FindsBy(How = How.XPath, Using = "//md-select[@placeholder='GPU type']")]
         public IWebElement GpuTypeDropDown { get; set; }
 
-        [FindsBy(How = How.XPath, Using = "//div[contains(text(),'NVIDIA Tesla V100')]")]
-        public IWebElement GpuType { get; set; }
+        public IWebElement GpuType => _driver.FindElement(By.XPath($"//div[contains(text(),'{_engineData.GPUType}')]"));
 
         [FindsBy(How = How.XPath, Using = "//md-select[@placeholder='Number of GPUs']")]
         public IWebElement GpuInstanceDropDown { get; set; }
 
-        [FindsBy(How = How.XPath, Using = "//md-option[@role='option' and @value='1' and contains(@ng-repeat,'gpuType')]")]
-        public IWebElement GpuInstance { get; set; }
+        public IWebElement GpuInstance => _driver.FindElement(By.XPath($"//md-option[@role='option' and @value='{_engineData.NumberOfGPUs}' and contains(@ng-repeat,'gpuType')]"));
 
         [FindsBy(How = How.XPath, Using = "//md-select[@placeholder='Local SSD']")]
         public IWebElement LocalSsdDropDown { get; set; }
 
-        [FindsBy(How = How.XPath, Using = "//div[contains(text(),'2x375 GB')]")]
-        public IWebElement LocalSsd { get; set; }
+        public IWebElement LocalSsd => _driver.FindElement(By.XPath($"//div[contains(text(),'{_engineData.LocalSSD}')]"));
 
-        [FindsBy(How = How.XPath, Using = "(//md-select[@placeholder='Datacenter location' and @ng-model='listingCtrl.computeServer.location'])")]
+		[FindsBy(How = How.XPath, Using = "(//md-select[@placeholder='Datacenter location' and @ng-model='listingCtrl.computeServer.location'])")]
         public IWebElement DatacenterDropDown { get; set; }
 
         [FindsBy(How = How.XPath, Using = "//md-option[@id='select_option_254']/div")]
@@ -71,41 +64,14 @@ namespace App.Tests.Pages
         [FindsBy(How = How.XPath, Using = "(//md-select[@placeholder='Committed usage'])[1]")]
         public IWebElement CommittedUsageDropDown { get; set; }
 
-        [FindsBy(How = How.XPath, Using = "//md-option[@id='select_option_134']")]
+        [FindsBy(How = How.Id, Using = "select_option_134")]
         public IWebElement CommittedUsage { get; set; }
 
         [FindsBy(How = How.XPath, Using = "(//button[contains(text(),'Add to Estimate')])[1]")]
         public IWebElement AddToEstimateButton { get; set; }
 
 
-		public void FillForm()
-        {
-            _wait.Until(ExpectedConditions.UrlMatches(_url));
-			var pageFrame = _wait.Until(ExpectedConditions.ElementToBeClickable(PageFrame));
-			_driver.SwitchTo().Frame(PageFrame);
-            var acccountFrame = _wait.Until(ExpectedConditions.ElementToBeClickable(FormFrame));
-            _driver.SwitchTo().Frame(FormFrame);
-            NumberOfInstancesInput.Clear();
-            NumberOfInstancesInput.SendKeys(_numberOfInstances);
-            SeriesDropDown.Click();
-            Series.Click();
-            MachineTypeDropDown.Click();
-            MachineType.Click();
-            AddGpuCheckbox.Click();
-            GpuTypeDropDown.Click();
-            GpuType.Click();
-            GpuInstanceDropDown.Click();
-            GpuInstance.Click();
-            LocalSsdDropDown.Click();
-            LocalSsd.Click();
-            DatacenterDropDown.Click();
-            DatacenterDropDown.SendKeys("Frankfurt" + Keys.Cancel);
-            _wait.Until(ExpectedConditions.ElementToBeClickable(Datacenter));
-            Datacenter.Click();
-            CommittedUsageDropDown.Click();
-            CommittedUsage.Click();
-            AddToEstimateButton.Click();
-		}
+		// Send Rusult
 
 		[FindsBy(How = How.XPath, Using = "//button[@id='Email Estimate']")]
 		public IWebElement EmailButton { get; set; }
@@ -118,22 +84,60 @@ namespace App.Tests.Pages
 
 		[FindsBy(How = How.XPath, Using = "//div[contains(@class,'total')]/h2/b")]
 		public IWebElement TotalCost { get; set; }
-		
 
-		public void SendResultEmail()
+		public string Estimate()
+        {
+            _wait.Until(ExpectedConditions.UrlMatches(_url));
+			_wait.Until(ExpectedConditions.ElementToBeClickable(PageFrame));
+            Thread.Sleep(1000);
+            IJavaScriptExecutor js = (IJavaScriptExecutor)_driver;
+            js.ExecuteScript("arguments[0].click()", PageFrame);
+            _driver.SwitchTo().Frame(PageFrame);
+			_wait.Until(ExpectedConditions.ElementToBeClickable(FormFrame));
+			Thread.Sleep(1000);
+			js.ExecuteScript("arguments[0].click()", FormFrame);
+            _driver.SwitchTo().Frame(FormFrame);
+			NumberOfInstancesInput.Clear();
+            NumberOfInstancesInput.SendKeys(_engineData.NumberOfInstances.ToString());
+            SeriesDropDown.Click();
+            Series.Click();
+            MachineTypeDropDown.Click();
+            MachineType.Click();
+            AddGpuCheckbox.Click();
+            GpuTypeDropDown.Click();
+            GpuType.Click();
+            GpuInstanceDropDown.Click();
+            GpuInstance.Click();
+            LocalSsdDropDown.Click();
+            LocalSsd.Click();
+            DatacenterDropDown.Click();
+            DatacenterDropDown.SendKeys(_engineData.DatacenterLocation + Keys.Cancel);
+            _wait.Until(ExpectedConditions.ElementToBeClickable(Datacenter));
+            Datacenter.Click();
+            CommittedUsageDropDown.Click();
+            CommittedUsage.Click();
+            AddToEstimateButton.Click();
+
+			string totalCostText = TotalCost.Text;
+			string[] splitWords = totalCostText.Split(' ');
+			string cost = splitWords[4];
+
+			return cost;
+		}
+
+		public void SendResultEmail(string email)
         {
 			var tabs = _driver.WindowHandles;
 			_driver.SwitchTo().Window(tabs[0]);
 			_driver.SwitchTo().Frame(PageFrame);
 			_driver.SwitchTo().Frame(FormFrame);
+			
 			_wait.Until(ExpectedConditions.ElementToBeClickable(EmailButton));
             EmailButton.Click();
 			_driver.SwitchTo().ActiveElement();
 			_wait.Until(ExpectedConditions.ElementToBeClickable(EmailInput));
-			EmailInput.SendKeys(_email);
+			EmailInput.SendKeys(email);
             SendButton.Click();
-            TotalCost.Text.Substring(0, 22);
-
 		}
 	}
 }

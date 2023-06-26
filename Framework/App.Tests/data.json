@@ -1,0 +1,10 @@
+{
+  "EngineData": {
+    "DatacenterLocation": "Frankfurt",
+    "GPUType": "NVIDIA Tesla V100",
+    "InstanceType": "n1-standard-8 (vCPUs: 8, RAM: 30GB)",
+    "LocalSSD": "2x375 GB",
+    "NumberOfGPUs": 1,
+    "NumberOfInstances": 4
+  }
+}

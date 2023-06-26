@@ -1,5 +1,4 @@
 using App.Tests.Pages;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 
 namespace App.Tests
 {
@@ -11,15 +10,18 @@ namespace App.Tests
         public void Estimate_Test()
         {
             SearchPage searchPage = new(Driver,Wait);
+            FormPage formPage = new(Driver, Wait);
+            MailPage mailPage = new(Driver, Wait);
+
 			searchPage.Navigate();
 			searchPage.Search(_searchText);
-            FormPage formPage = new(Driver, Wait);
-            formPage.FillForm();
+            var expected = formPage.Estimate();
 
-            MailPage mailPage = new(Driver, Wait);
-            mailPage.EnterToMail();
+            var email = mailPage.EnterToMail();
+            formPage.SendResultEmail(email);
+            var result = mailPage.CheckResultMail();
 
-            formPage.SendResultEmail();
+			Assert.That(result+"gw", Is.EqualTo(expected));
         }
     }
 }
