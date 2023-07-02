@@ -1,0 +1,51 @@
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+
+var driver = new ChromeDriver();
+driver.Url = "https://www.bbc.com/sport";
+
+// Sports Link
+IWebElement btn = driver.FindElement(By.XPath("//a[@href='/sport']"));
+
+// BBC button using XPath:
+IWebElement bbcIcon = driver.FindElement(By.XPath("//div[@id='orb-header']//a[contains(@class, 'orb-logo')]"));
+
+Search field:
+ID:
+IWebElement searchField = driver.FindElement(By.Id("search-input"));
+CSS Selector:
+IWebElement searchField = driver.FindElement(By.CssSelector("input[name='q'][type='text']"));
+Name:
+IWebElement searchField = driver.FindElement(By.Name("q"));
+
+// News Blog List
+var nodes = driver.FindElements(By.XPath("//li[contains(@class,'ListItem')]"));
+
+
+
+//////////
+using HtmlAgilityPack;
+var web = new HtmlWeb();
+var doc = web.Load("https://www.bbc.com/sport").DocumentNode;
+
+// Sports Link
+var titleNode = doc.SelectSingleNode("//a[@href='/sport']");
+
+
+var listNodes = doc.SelectNodes("//li[contains(@class,'ListItem')]");
+
+foreach (var listNode in listNodes)
+{
+    var headline = listNode.SelectSingleNode("descendant::p[contains(@class,'PromoHeadline')]/span")?.InnerText;
+    var topic = listNode.SelectSingleNode("descendant::span[contains(@class,'MetadataText')]")?.InnerText;
+    if (headline != null && topic != null)
+    {
+        Console.WriteLine(headline + ":\n--" + topic);
+
+    }
+}
+
+
+
+
+
